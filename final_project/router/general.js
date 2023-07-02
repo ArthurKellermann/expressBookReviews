@@ -8,8 +8,10 @@ const public_users = express.Router();
 public_users.post("/register", (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  
+
   if (username && password) {
+    if (!isValid(username)) return res.status(404).json({ message: "The username is invalid!" });
+
     for (let key of users) {
       if (key.username === username) {
         return res.status(404).json({ message: "User already exists!" });
@@ -27,19 +29,30 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
-  const allBooks = JSON.stringify(books);
-  res.send(allBooks);
+  const allBooks = JSON.stringify(books, null, 4);
+
+  return new Promise((resolve, reject) => {
+    resolve(res.send(allBooks));
+  })
+    .then(() => console.log('Promise complete'))
+    .catch(e => console.log(e));;
+
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
   const isbn = req.params.isbn;
 
-  if (isbn <= Object.keys(books).length) {
-    return res.send(books[isbn]);
-  } else {
-    return res.status(404).json({ message: "ISBN Invalid!" });
-  }
+  return new Promise((resolve, reject) => {
+    if (isbn <= Object.keys(books).length) {
+      resolve(res.send(books[isbn]));
+    } else {
+      return res.status(404).json({ message: "Invalid ISBN!" });
+    }
+  })
+    .then(() => console.log('Promise complete'))
+    .catch(e => console.log(e));;
+
 
 });
 
@@ -49,11 +62,17 @@ public_users.get('/author/:author', function (req, res) {
   const codedAuthor = req.params.author;
   const author = decodeURIComponent(codedAuthor);
 
-  for (let key in books) {
-    if (books[key].author == author) {
-      return res.send(books[key]);
+  return new Promise((resolve, reject) => {
+    for (let key in books) {
+      if (books[key].author == author) {
+        resolve(res.send(books[key]));
+      }
     }
-  }
+    return res.status(404).json({ message: "Invalid author!" });
+  })
+    .then(() => console.log('Promise Complete'))
+    .catch(e => console.log(e));
+
 
 });
 
@@ -62,11 +81,17 @@ public_users.get('/title/:title', function (req, res) {
   const codedTitle = req.params.title;
   const title = decodeURIComponent(codedTitle);
 
-  for (let key in books) {
-    if (books[key].title == title) {
-      return res.send(books[key]);
+  return new Promise((resolve, reject) => {
+    for (let key in books) {
+      if (books[key].title == title) {
+        resolve(res.send(books[key]));
+      }
     }
-  }
+    return res.status(404).json({ message: "Invalid title!" });
+  })
+    .then(() => console.log('Promise complete'))
+    .catch(e => console.log(e));
+
 });
 
 //  Get book review
@@ -75,9 +100,8 @@ public_users.get('/review/:isbn', function (req, res) {
   if (isbn) {
     return res.send(books[isbn].reviews);
   } else {
-    return res.status(404).json({ message: "ISBN Invalid!" });
+    return res.status(404).json({ message: "Invalid ISBN!" });
   }
-
 
 });
 

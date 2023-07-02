@@ -58,7 +58,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     books[isbn].reviews[username] = review;
     return res.send(books[isbn]);
   } else {
-    return res.status(404).json({ message: "ISBN Invalid!" });
+    return res.status(404).json({ message: "Invalid ISBN!" });
   }
 });
 
@@ -67,7 +67,7 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
   const isbn = req.params.isbn;
   const sessionUsername = req.session.authorization.username;
 
-  if (!isbn) return res.status(404).json({ message: "ISBN Invalid!" });
+  if (!isbn) return res.status(404).json({ message: "Invalid ISBN!" });
 
   if (books[isbn].reviews[sessionUsername]) {
     delete books[isbn].reviews[sessionUsername];
